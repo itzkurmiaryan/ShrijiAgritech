@@ -2,12 +2,17 @@ require("dotenv").config();
 const express = require("express");
 const nodemailer = require("nodemailer");
 const cors = require("cors");
+const path = require("path");
 
 const app = express();
 
+// Middlewares
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Serve static files
+app.use(express.static(path.join(__dirname, "public")));
 
 // ================= EMAIL TRANSPORTER =================
 
@@ -15,8 +20,8 @@ const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
     user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  }
+    pass: process.env.EMAIL_PASS,
+  },
 });
 
 // Verify transporter
@@ -43,21 +48,19 @@ app.post("/send", async (req, res) => {
         <p><b>Name:</b> ${name}</p>
         <p><b>Email:</b> ${email}</p>
         <p><b>Message:</b><br>${message}</p>
-      `
+      `,
     });
 
     res.json({ success: true });
-
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ success: false });
+    console.log("Mail Error:", error);
+    res.status(500).json({ success: false, error: error.message });
   }
 });
 
 // ================= PLACE ORDER ROUTE =================
 
 app.post("/place-order", async (req, res) => {
-
   const {
     name,
     phone,
@@ -67,7 +70,7 @@ app.post("/place-order", async (req, res) => {
     address,
     district,
     state,
-    message
+    message,
   } = req.body;
 
   try {
@@ -86,20 +89,22 @@ app.post("/place-order", async (req, res) => {
         <p><b>District:</b> ${district}</p>
         <p><b>State:</b> ${state}</p>
         <p><b>Message:</b> ${message}</p>
-      `
+      `,
     });
 
     res.json({ success: true });
-
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ success: false });
+    console.log("Order Error:", error);
+    res.status(500).json({ success: false, error: error.message });
   }
-
 });
 
 // ================= SERVER START =================
 
-app.listen(5000, () => {
-  console.log("🚀 Server running on port 5000");
+const PORT = process.env.PORT || 5000;
+
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
+
+module.exports = app;
