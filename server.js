@@ -14,11 +14,6 @@ app.use(express.urlencoded({ extended: true }));
 // Serve static files
 app.use(express.static(path.join(__dirname, "public")));
 
-// Serve homepage manually
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
-});
-
 // ================= EMAIL TRANSPORTER =================
 
 const transporter = nodemailer.createTransport({
@@ -27,15 +22,6 @@ const transporter = nodemailer.createTransport({
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
-});
-
-// Verify transporter
-transporter.verify(function (error, success) {
-  if (error) {
-    console.log("Transport Error:", error);
-  } else {
-    console.log("✅ Server ready to send emails");
-  }
 });
 
 // ================= CONTACT ROUTE =================
@@ -56,10 +42,10 @@ app.post("/send", async (req, res) => {
       `,
     });
 
-    res.json({ success: true });
+    return res.json({ success: true });
   } catch (error) {
     console.log("Mail Error:", error);
-    res.status(500).json({ success: false, error: error.message });
+    return res.status(500).json({ success: false });
   }
 });
 
@@ -97,19 +83,13 @@ app.post("/place-order", async (req, res) => {
       `,
     });
 
-    res.json({ success: true });
+    return res.json({ success: true });
   } catch (error) {
     console.log("Order Error:", error);
-    res.status(500).json({ success: false, error: error.message });
+    return res.status(500).json({ success: false });
   }
 });
 
-// ================= SERVER START =================
-
-const PORT = process.env.PORT || 5000;
-
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
-});
+// ❌ REMOVE app.listen()
 
 module.exports = app;
