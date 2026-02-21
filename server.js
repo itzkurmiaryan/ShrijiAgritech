@@ -14,6 +14,11 @@ app.use(express.urlencoded({ extended: true }));
 // Serve static files
 app.use(express.static(path.join(__dirname, "public")));
 
+// Serve homepage manually
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
+});
+
 // ================= EMAIL TRANSPORTER =================
 
 const transporter = nodemailer.createTransport({
